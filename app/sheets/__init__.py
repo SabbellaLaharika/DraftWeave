@@ -1,0 +1,3 @@
+"""
+Google Sheets integration package.
+"""
