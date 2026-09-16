@@ -44,6 +44,10 @@ def extract_from_url(url: str) -> ExtractedContent:
     if not extracted_text or not extracted_text.strip():
         raise ValueError(f"Could not extract meaningful article content from URL: {clean_url}")
 
+    clean_text = extracted_text.strip()
+    if len(clean_text) > 4000:
+        clean_text = clean_text[:4000]
+
     # Try extracting metadata (e.g. title) via trafilatura metadata extraction
     metadata_obj = trafilatura.extract_metadata(downloaded)
     title = metadata_obj.title if (metadata_obj and metadata_obj.title) else ""
@@ -51,10 +55,10 @@ def extract_from_url(url: str) -> ExtractedContent:
     return ExtractedContent(
         content_type="url",
         source_identifier=clean_url,
-        raw_text=extracted_text.strip(),
+        raw_text=clean_text,
         metadata={
             "title": title,
             "url": clean_url,
-            "char_count": len(extracted_text.strip())
+            "char_count": len(clean_text)
         }
     )

@@ -19,23 +19,26 @@ class Settings(BaseSettings):
     GOOGLE_SHEET_NAME: str = "DraftWeave Content"
     GOOGLE_SHEET_ID: str = ""
 
-    # Primary Cloud LLM Provider: NVIDIA
-    NVIDIA_API_KEY: str = ""
-    NVIDIA_MODEL: str = "nvidia/nemotron-3.5-lightning-30b"
-
-    # Secondary Cloud LLM Providers
+    # Cloud LLM Providers (Gemini / Groq)
     GOOGLE_API_KEY: str = ""
     GROQ_API_KEY: str = ""
 
-    # Local Fallback LLM Provider: Ollama
+    # Local Fallback LLM Provider (Ollama)
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.2:3b"
 
-    # LLM Provider Configuration
-    LLM_PROVIDER: str = "nvidia"
+    # LLM Provider Configuration ('gemini', 'groq', or 'ollama')
+    LLM_PROVIDER: str = "gemini"
 
     # SQLite Database
     SQLITE_DB_PATH: str = "data/style_memory.db"
+
+    @property
+    def effective_ollama_url(self) -> str:
+        url = (self.OLLAMA_BASE_URL or "http://localhost:11434").rstrip("/")
+        if os.path.exists("/.dockerenv") and "localhost" in url:
+            return url.replace("localhost", "host.docker.internal")
+        return url
 
     @property
     def db_path(self) -> Path:

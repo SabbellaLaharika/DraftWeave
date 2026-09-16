@@ -12,12 +12,12 @@ class TestLLMModule(unittest.TestCase):
     def test_prompt_construction_without_style(self):
         prompt = build_generation_prompt("Sample article text")
         self.assertIn("Sample article text", prompt["user"])
-        self.assertNotIn("USER STYLE GUIDE PREFERENCE", prompt["system"])
+        self.assertNotIn("USER HOUSE STYLE DIRECTIVES", prompt["system"])
 
     def test_prompt_construction_with_style(self):
         style = "Write like a pirate with witty punchlines."
         prompt = build_generation_prompt("Sample article text", style_prompt=style)
-        self.assertIn("USER STYLE GUIDE PREFERENCE", prompt["system"])
+        self.assertIn("USER HOUSE STYLE DIRECTIVES", prompt["system"])
         self.assertIn("Write like a pirate", prompt["system"])
 
     def test_json_parser_valid(self):
@@ -60,13 +60,14 @@ class TestLLMModule(unittest.TestCase):
         self.assertTrue(res.x_variant.endswith("..."))
 
     @patch("requests.post")
-    def test_nvidia_llm_client_call(self, mock_post):
+    def test_groq_llm_client_call(self, mock_post):
         mock_resp = MagicMock()
+        mock_resp.status_code = 200
         mock_resp.json.return_value = {
             "choices": [
                 {
                     "message": {
-                        "content": '{"title":"NVIDIA Title","rationale":"Rationale","category":"Tech","variants":{"x_post":"Short X","linkedin_post":"Long Linkedin"}}'
+                        "content": '{"title":"Groq Title","rationale":"Rationale","category":"Tech","variants":{"x_post":"Short X","linkedin_post":"Long Linkedin"}}'
                     }
                 }
             ]
@@ -75,11 +76,11 @@ class TestLLMModule(unittest.TestCase):
         mock_post.return_value = mock_resp
 
         client = LLMClient()
-        client.nvidia_api_key = "nvapi-testkey"
-        client.primary_provider = "nvidia"
+        client.groq_api_key = "gsk_testkey"
+        client.primary_provider = "groq"
 
         result = client.generate_content("Test input text")
-        self.assertEqual(result.title, "NVIDIA Title")
+        self.assertEqual(result.title, "Groq Title")
         self.assertEqual(result.x_variant, "Short X")
 
     @patch("requests.post")
@@ -94,7 +95,8 @@ class TestLLMModule(unittest.TestCase):
         mock_post.return_value = mock_resp
 
         client = LLMClient()
-        client.nvidia_api_key = ""  # No NVIDIA key -> falls back to Ollama
+        client.gemini_api_key = ""
+        client.groq_api_key = ""  # No cloud keys -> falls back to Ollama
         client.primary_provider = "ollama"
 
         result = client.generate_content("Test input text")

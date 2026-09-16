@@ -1,6 +1,6 @@
 # DraftWeave: Multi-Format Telegram Content Agent with Persistent Memory
 
-DraftWeave is an automated, production-minded **Content Ingestion & Strategy Agent** built to operate via Telegram. It ingests content across multiple formats (**Plain Text**, **Web Article URLs**, and **PDF Documents**), converts and processes them through Large Language Models (NVIDIA Nemotron API primary with Gemini, Groq, and local Ollama fallbacks), applies persistent user-specific **Style Memory**, and logs structured, multi-variant drafts idempotently into **Google Sheets**.
+DraftWeave is an automated, production-minded **Content Ingestion & Strategy Agent** built to operate via Telegram. It ingests content across multiple formats (**Plain Text**, **Web Article URLs**, and **PDF Documents**), converts and processes them through Large Language Models (Gemini and Groq cloud APIs with local Ollama fallbacks), applies persistent user-specific **Style Memory**, and logs structured, multi-variant drafts idempotently into **Google Sheets**.
 
 ---
 
@@ -16,8 +16,7 @@ DraftWeave is an automated, production-minded **Content Ingestion & Strategy Age
    - Dynamic prompt injection ensures all future AI generations match the user's house style.
 
 3. **Multi-Backend LLM Orchestration**:
-   - **Primary Cloud Provider**: NVIDIA NIM API (`nvidia/nemotron-3.5-lightning-30b` / `nvidia/nemotron-3-super-120b`).
-   - **Secondary Cloud Fallbacks**: Google Gemini (`gemini-1.5-flash`) & Groq (`llama-3.3-70b-versatile`).
+   - **Cloud Providers**: Google Gemini (`gemini-1.5-flash`) & Groq (`llama-3.3-70b-versatile`).
    - **Local Fallback**: Ollama hosting `llama3.2:3b` or `gemma:2b` via `http://localhost:11434`.
    - **Structured JSON Engine**: Enforces strict JSON schema validation, automatic retry loops, and strict character limits ($\le 280$ characters for X posts).
 
@@ -54,7 +53,7 @@ DraftWeave is an automated, production-minded **Content Ingestion & Strategy Age
 │ AI Core & LLM Orchestrator                                  │
 │  ├── Retrieve User Style Prompt                             │
 │  ├── Build System Persona & Input Prompt                    │
-│  └── Call LLM Engine (NVIDIA Nemotron / Gemini / Ollama)    │
+│  └── Call LLM Engine (Gemini / Groq / Ollama)               │
 │  └── Validate Structured JSON Output & Truncate X Draft     │
 └──────────────────────────────┬──────────────────────────────┘
                                │
@@ -111,13 +110,11 @@ cp .env.example .env
 | `GOOGLE_SHEETS_CREDENTIALS_JSON` | File path to Service Account JSON key | `credentials.json` |
 | `GOOGLE_SHEET_NAME` | Target Google Sheet Name | `DraftWeave Content` |
 | `GOOGLE_SHEET_ID` | Target Google Sheet Spreadsheet ID | `1A2b3C4d5E6f7G8h9I0j` |
-| `NVIDIA_API_KEY` | NVIDIA NIM API Key (Primary Cloud Provider) | `nvapi-...` |
-| `NVIDIA_MODEL` | NVIDIA Model Name | `nvidia/nemotron-3.5-lightning-30b` |
-| `GOOGLE_API_KEY` | Google AI Studio API Key (Fallback) | `AIzaSy...` |
-| `GROQ_API_KEY` | Groq Cloud API Key (Fallback) | `gsk_...` |
+| `GOOGLE_API_KEY` | Google AI Studio API Key | `AIzaSy...` |
+| `GROQ_API_KEY` | Groq Cloud API Key | `gsk_...` |
 | `OLLAMA_BASE_URL` | Local Ollama Base URL | `http://localhost:11434` |
 | `OLLAMA_MODEL` | Local Ollama Model Name | `llama3.2:3b` |
-| `LLM_PROVIDER` | Active LLM Provider Strategy | `nvidia` (options: `nvidia`, `gemini`, `groq`, `ollama`) |
+| `LLM_PROVIDER` | Active LLM Provider Strategy | `gemini` (options: `gemini`, `groq`, `ollama`) |
 | `SQLITE_DB_PATH` | Path to SQLite Style Memory DB | `data/style_memory.db` |
 
 ---

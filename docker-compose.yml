@@ -10,7 +10,11 @@ services:
     env_file:
       - .env
     volumes:
+      - ./app:/app/app
       - ./data:/app/data
+      - ./credentials.json:/app/credentials.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "python", "-m", "app.healthcheck"]
       interval: 15s

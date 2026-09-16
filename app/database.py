@@ -58,6 +58,16 @@ def get_user_style(user_id: int) -> Optional[str]:
         conn.close()
 
 
+def delete_user_style(user_id: int) -> None:
+    """Delete/reset user style preference."""
+    conn = get_db_connection()
+    try:
+        with conn:
+            conn.execute("DELETE FROM user_styles WHERE user_id = ?", (user_id,))
+    finally:
+        conn.close()
+
+
 def get_user_style_hash(user_id: int) -> str:
     """
     Get a hash of user style prompt.

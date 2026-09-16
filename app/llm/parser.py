@@ -67,8 +67,10 @@ def parse_and_validate_llm_json(raw_response: str) -> LLMContentResult:
         rationale = "Generated overview based on submitted source content."
     if not category:
         category = "General"
+    if not x_post:
+        x_post = f"{title}: {rationale}"[:275]
     if not linkedin_post:
-        linkedin_post = x_post or "Content summary unavailable."
+        linkedin_post = f"**{title}**\n\n{rationale}"
 
     # Enforce X_Variant length <= 280 characters
     if len(x_post) > 280:

@@ -28,6 +28,10 @@ class TestGoogleSheetsModule(unittest.TestCase):
         key_with_style = client.build_composite_key(url, style_hash="a1b2c3d4e5f6")
         self.assertEqual(key_with_style, "https://example.com/blog/123#style:a1b2c3d4e5f6")
 
+        key_with_user_and_style = client.build_composite_key(url, style_hash="a1b2c3d4e5f6", user_id=123456789)
+        self.assertTrue(key_with_user_and_style.startswith("usr:"))
+        self.assertIn("https://example.com/blog/123#style:a1b2c3d4e5f6", key_with_user_and_style)
+
     @patch.object(GoogleSheetsClient, "connect")
     def test_idempotent_duplicate_detection(self, mock_connect):
         mock_worksheet = MagicMock()
