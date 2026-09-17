@@ -33,36 +33,33 @@ DraftWeave is an automated, production-minded **Content Ingestion & Strategy Age
 
 ## 🏗️ System Architecture & Data Flow
 
-```
-[Telegram User] 
-       │ (Sends Text, URL, PDF, or Commands)
-       ▼
-[Telegram Bot API]
-       │ (Long Polling)
-       ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Ingestion Layer & Content Router                            │
-│  ├── /start & /setstyle ──► SQLite Style Memory             │
-│  ├── Plain Text ──────────► Text Normalizer & Hasher        │
-│  ├── Web URL ─────────────► Trafilatura HTML Extractor      │
-│  └── PDF Document ────────► MarkItDown PDF-to-Markdown      │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│ AI Core & LLM Orchestrator                                  │
-│  ├── Retrieve User Style Prompt                             │
-│  ├── Build System Persona & Input Prompt                    │
-│  └── Call LLM Engine (Gemini / Groq / Ollama)               │
-│  └── Validate Structured JSON Output & Truncate X Draft     │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Google Sheets Integration Layer                             │
-│  ├── Check Idempotency (SourceIdentifier + Style Hash)      │
-│  └── Append Row to 'Content' Worksheet                      │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    User["Telegram User"] -->|Sends Text, URL, PDF, Commands| BotAPI["Telegram Bot API"]
+    BotAPI -->|Long Polling| Router["Content Ingestion & Router"]
+
+    subgraph Ingestion ["Ingestion Service & Router"]
+        Router -->|"/start, /setstyle"| StyleDB[("SQLite Style Memory<br/>data/style_memory.db")]
+        Router -->|"Plain Text"| TextExtractor["Text Normalizer & Hasher"]
+        Router -->|"Web URL"| HTMLExtractor["HTML Extractor<br/>(trafilatura)"]
+        Router -->|"PDF Document"| PDFExtractor["PDF Extractor<br/>(microsoft/markitdown)"]
+    end
+
+    subgraph AICore ["AI Core & LLM Orchestration"]
+        StyleDB -.->|Injects Style Prompt| Orchestrator["LLM Orchestrator"]
+        TextExtractor --> Orchestrator
+        HTMLExtractor --> Orchestrator
+        PDFExtractor --> Orchestrator
+
+        Orchestrator -->|Request| LLMAPI["LLM Engine<br/>(Gemini / Groq / Ollama)"]
+        LLMAPI -->|Raw JSON| Orchestrator
+        Orchestrator -->|Parse & Enforce X <= 280 chars| FormattedData["Structured Data Result"]
+    end
+
+    subgraph Output ["Storage & Output Layer"]
+        FormattedData --> SheetsWriter["Google Sheets Writer"]
+        SheetsWriter -->|Check Idempotency| SheetsAPI[("Google Sheets API<br/>Content Worksheet")]
+    end
 ```
 
 ---
